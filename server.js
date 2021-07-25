@@ -6,6 +6,11 @@ const app = express();
 const routerApi = express.Router();
 const puerto = 8080;
 
+const http = require('http');
+const server = http.createServer(app);
+const {Server} = require('socket.io');
+const io = new Server(server);
+
 app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
 
@@ -18,9 +23,20 @@ app.use(express.static(__dirname + '/public'));
 
 let productos = [];
 let producto;
+let productosWs = [];
+
+io.on('connection', (socket) => {
+
+  io.sockets.emit('mensajes', productosWs);
+
+  socket.on('producto-nuevo', data => {
+    productosWs.push(data);
+  })
+
+});
 
 app.get('/', (req,res) => {
-  res.render('home');
+  res.render('home', {productosWs: productosWs});
 });
 
 app.get("/productos/vista", (req, res) => {
@@ -28,8 +44,7 @@ app.get("/productos/vista", (req, res) => {
 });
 
 routerApi.get("/productos", (req, res) => {
-  let response =
-    productos.length > 0 ? productos : { error: "no hay productos cargados" };
+  let response = productos.length > 0 ? productos : { error: "no hay productos cargados" };
   res.json(response);
 });
 
@@ -91,7 +106,7 @@ routerApi.delete("/productos/:id", (req, res) => {
 
 app.use('/api', routerApi);
 
-const server = app.listen(puerto, () => {
+server.listen(puerto, () => {
   console.log(`servidor escuchando en http://localhost:${puerto}`);
 });
 

@@ -11,6 +11,24 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+        var socket = io();
+        socket.on('mensajes', data => {
+            productosWs = JSON.stringify(data);            
+        });
+
+        function enviarProducto(e){            
+            let producto = {
+                title: document.getElementById("title").value, 
+                price: document.getElementById("price").value, 
+                thumbnail: document.getElementById("thumbnail").value
+            }
+            socket.emit('producto-nuevo', producto);
+        }
+
+    </script>
 
     <title>Websocket</title>
 </head>
